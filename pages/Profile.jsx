@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { supabase } from '../services/supabase';
 import { useAuth } from '../context/AuthContext';
 import { invalidateProfile } from '../services/profileCache';
+import { useOnFocus } from '../services/useOnFocus';
 import RatingStars from '../components/RatingStars';
 import ReviewInteractions from '../components/ReviewInteractions';
 import Avatar from '../components/Avatar';
@@ -52,6 +53,11 @@ export default function Profile() {
       setAvatarUrl(profile.avatar_url || null);
     }
   }, [profile?.id]);
+
+  // Re-fetch logs when returning to the app from background
+  useOnFocus(() => {
+    if (profile) loadProfileData();
+  });
 
   async function loadProfileData() {
     setLoading(true);

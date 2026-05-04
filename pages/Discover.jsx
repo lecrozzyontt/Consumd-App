@@ -9,6 +9,7 @@ import {
 } from '../services/tmdb';
 import { fetchTrendingBooks, searchBooks } from '../services/openLibrary';
 import { fetchTrendingGames, searchGames } from '../services/rawg';
+import { useOnFocus } from '../services/useOnFocus';
 import './Discover.css';
 
 const FILTERS = ['all', 'movies', 'shows', 'books', 'games'];
@@ -35,6 +36,9 @@ export default function Discover() {
   useEffect(() => {
     loadAll();
   }, []);
+
+  // Re-fetch categories when returning to the app from background
+  useOnFocus(loadAll);
 
   async function loadAll() {
     setLoading(true);

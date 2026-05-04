@@ -5,6 +5,7 @@ import { supabase } from '../services/supabase';
 import { fetchTrendingMovies, fetchTrendingShows } from '../services/tmdb';
 import { fetchTrendingGames } from '../services/rawg';
 import { fetchTrendingBooks } from '../services/openLibrary';
+import { useOnFocus } from '../services/useOnFocus';
 import CategoryRow from '../components/CategoryRow';
 import ActivityCard from '../components/ActivityCard';
 import './Home.css';
@@ -35,6 +36,12 @@ export default function Home() {
     if (!user?.id) return;
     loadFriendsFeed(user.id);
   }, [user?.id]);
+
+  // Re-fetch everything when the app comes back to the foreground
+  useOnFocus(() => {
+    loadMedia();
+    if (user?.id) loadFriendsFeed(user.id);
+  });
 
   async function loadMedia() {
     setLoadingMedia(true);

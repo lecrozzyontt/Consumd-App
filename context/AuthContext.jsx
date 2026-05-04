@@ -9,15 +9,11 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log('[AuthContext] Initializing...');
-
     const initSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-
       const u = session?.user ?? null;
       setUser(u);
       setLoading(false);
-
       if (u) await ensureProfile(u.id, u);
     };
 
@@ -25,13 +21,9 @@ export function AuthProvider({ children }) {
 
     const { data: { subscription } } =
       supabase.auth.onAuthStateChange(async (event, session) => {
-        console.log('[AuthContext] Auth event:', event);
-
         const u = session?.user ?? null;
-
         setUser(u);
         setLoading(false);
-
         if (u) {
           await ensureProfile(u.id, u);
         } else {
@@ -39,7 +31,24 @@ export function AuthProvider({ children }) {
         }
       });
 
-    return () => subscription.unsubscribe();
+    // Re-check session whenever the PWA comes back to the foreground.
+    // On iOS, backgrounding suspends JS — on resume auth state may be stale.
+    // Spreading the user object ensures a new reference so any useEffect([user])
+    // in pages re-fires and reloads its data.
+    const handleVisibility = async () => {
+      if (document.visibilityState === 'visible') {
+        const { data: { session } } = await supabase.auth.getSession();
+        const u = session?.user ?? null;
+        setUser(u ? { ...u } : null);
+        if (u) await ensureProfile(u.id, u);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      subscription.unsubscribe();
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
   }, []);
 
   /**
