@@ -37,35 +37,10 @@ export function AuthProvider({ children }) {
     // in pages re-fires and reloads its data.
     const handleVisibility = async () => {
       if (document.visibilityState === 'visible') {
-        console.log('[AuthContext] App returned to foreground. Firing recovery...');
-        
-        try {
-          // If you want to show the spinner while it reconnects:
-          // setLoading(true); 
-          
-          console.log('[AuthContext] Attempting to refresh Supabase session...');
-          const { error: refreshError } = await supabase.auth.refreshSession();
-          if (refreshError) console.error('[AuthContext] Refresh failed:', refreshError.message);
-
-          console.log('[AuthContext] Fetching current session...');
-          const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-          if (sessionError) console.error('[AuthContext] Get session failed:', sessionError.message);
-
-          const u = session?.user ?? null;
-          console.log('[AuthContext] User found after wake:', u?.id || 'No user');
-          
-          setUser(u ? { ...u } : null);
-          
-          if (u) {
-            console.log('[AuthContext] Ensuring profile...');
-            await ensureProfile(u.id, u);
-          }
-        } catch (err) {
-          console.error('[AuthContext] Critical error resuming app:', err);
-        } finally {
-          console.log('[AuthContext] Recovery complete. Releasing loading lock.');
-          setLoading(false); // ALWAYS force loading to false so the app doesn't freeze
-        }
+        const { data: { session } } = await supabase.auth.getSession();
+        const u = session?.user ?? null;
+        setUser(u ? { ...u } : null);
+        if (u) await ensureProfile(u.id, u);
       }
     };
     document.addEventListener('visibilitychange', handleVisibility);
