@@ -37,6 +37,9 @@ export function AuthProvider({ children }) {
     // in pages re-fires and reloads its data.
     const handleVisibility = async () => {
       if (document.visibilityState === 'visible') {
+        // Force Supabase to wake up the network connection and refresh the token
+        await supabase.auth.refreshSession();
+        
         const { data: { session } } = await supabase.auth.getSession();
         const u = session?.user ?? null;
         setUser(u ? { ...u } : null);
