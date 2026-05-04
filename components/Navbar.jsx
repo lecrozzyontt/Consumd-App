@@ -75,7 +75,7 @@ export default function Navbar() {
     path === '/' ? pathname === '/' : pathname.startsWith(path);
 
   return (
-    <header className="navbar">
+    <header className="navbar safe-header">
       <div className="navbar-inner">
         <Link to="/" className="navbar-brand">
           <span className="brand-text">Consumd</span>

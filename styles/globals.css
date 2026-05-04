@@ -110,7 +110,15 @@ h1, h2, h3 {
   flex: 1;
   width: 100%;
   overflow-y: auto;
-  padding-top: var(--nav-height);
+  /* Add safe area inset to the nav offset */
+  padding-top: calc(var(--nav-height) + env(safe-area-inset-top));
+}
+
+/* Add this utility class to your Navbar component/element */
+.safe-header {
+  padding-top: env(safe-area-inset-top);
+  /* If your navbar has a fixed height, it needs to expand to include the notch */
+  height: calc(var(--nav-height) + env(safe-area-inset-top)) !important;
 }
 
 /* ============================================================
